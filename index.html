@@ -18,7 +18,7 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Viewfinder video asli (Bukan canvas, agar tidak patah-patah) */
+        /* Viewfinder video asli */
         #viewfinder {
             position: absolute;
             top: 0;
@@ -86,11 +86,20 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         }
 
-        /* Widget Kecepatan & Timer DOM */
+        /* Widget Panel */
         .glass-panel {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hide scrollbar for filter menu */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
@@ -102,33 +111,36 @@
         <div class="mb-8 flex flex-col items-center">
             <img src="logo.png" alt="GoWeb Logo" class="w-32 h-32 mb-4 rounded-[2rem] shadow-2xl border border-gray-800">
             <h1 class="text-4xl font-extrabold tracking-tighter mb-2">GoWeb<span class="text-red-500">CAM</span></h1>
-            <p class="text-gray-400">Smooth Action Camera & Live Telemetry</p>
+            <p class="text-gray-400">Touring Edition - Smooth Action Cam & Telemetry</p>
         </div>
         
         <div class="bg-black/40 p-6 rounded-2xl max-w-md w-full border border-gray-700 shadow-2xl mb-8">
-            <h2 class="text-xl font-semibold mb-4 text-left">Fitur Aktif:</h2>
+            <h2 class="text-xl font-semibold mb-4 text-left">Fitur Touring:</h2>
             <ul class="text-left text-gray-300 space-y-3 mb-6 text-sm">
                 <li class="flex items-center gap-3">
-                    <span class="text-blue-400">📹</span> Perekaman Mulus (No Lag)
+                    <span class="text-blue-400">📹</span> Perekaman Super Mulus (No Lag)
                 </li>
                 <li class="flex items-center gap-3">
-                    <span class="text-green-400">📍</span> Live GPS Speedometer
+                    <span class="text-green-400">📍</span> Live GPS Speedometer Akurat
                 </li>
                 <li class="flex items-center gap-3">
-                    <span class="text-yellow-400">💡</span> Anti Layar Mati (Wake Lock)
+                    <span class="text-yellow-400">💡</span> Anti Layar Mati (Wake Lock Aktif)
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="text-purple-400">🎨</span> Pilihan Efek Kamera Estetik
                 </li>
             </ul>
             <button id="start-app-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg uppercase tracking-wider shadow-lg">
-                Buka Kamera
+                Mulai Touring
             </button>
         </div>
         <p id="error-message" class="text-red-400 text-sm h-6"></p>
     </div>
 
-    <!-- Video Element Asli (Ditampilkan sebagai Viewfinder) -->
-    <video id="viewfinder" autoplay playsinline muted></video>
+    <!-- Video Element Asli (Viewfinder dengan Filter Touring) -->
+    <video id="viewfinder" autoplay playsinline muted style="filter: none;"></video>
 
-    <!-- UI Overlay (Ditampilkan di layar, tapi tidak ikut terekam) -->
+    <!-- UI Overlay -->
     <div id="ui-layer" class="p-4 hidden">
         
         <!-- Barisan Atas -->
@@ -137,7 +149,7 @@
             <!-- Kiri Atas: Branding & Notifikasi Download -->
             <div class="flex flex-col gap-2">
                 <div class="glass-panel px-3 py-1 rounded-lg text-sm font-bold opacity-70">
-                    GoWeb CAM
+                    Powered : GoWeb CAM © Copyright Bang Fer™
                 </div>
                 
                 <div id="download-container" class="hidden interactive glass-panel p-4 rounded-xl mt-2">
@@ -161,24 +173,39 @@
             </div>
         </div>
 
-        <!-- Barisan Bawah -->
-        <div class="flex justify-between items-end w-full pb-4">
+        <!-- Barisan Bawah: Efek Kamera & Tombol Rekam -->
+        <div class="flex flex-col items-center justify-end w-full pb-4 gap-4">
             
-            <!-- Kiri Bawah: Speedometer DOM -->
-            <div class="glass-panel rounded-xl px-4 py-2 flex items-baseline gap-2 min-w-[100px]">
-                <span id="speed-text" class="font-mono text-5xl font-bold">00</span>
-                <span class="text-emerald-500 font-bold text-sm">KM/H</span>
+            <!-- Pilihan Efek Kamera Touring -->
+            <div class="interactive flex gap-2 overflow-x-auto w-full px-4 pb-1 justify-center hide-scrollbar">
+                <button class="filter-btn active bg-white/30 text-white px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-white/50 shadow-lg whitespace-nowrap" data-filter="none">Normal</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="contrast(130%) saturate(140%) brightness(95%">Cinematic</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="saturate(180%) contrast(110%)">Vivid Road</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="sepia(40%) contrast(120%) brightness(105%)">Warm Sunset</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="hue-rotate(180deg) saturate(130%)">Cool Blue</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="grayscale(100%) contrast(140%)">Classic B&W</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="contrast(150%) hue-rotate(290deg) saturate(160%)">Cyberpunk</button>
             </div>
 
-            <!-- Tengah Bawah: Tombol Record -->
-            <div class="interactive absolute left-1/2 transform -translate-x-1/2 bottom-8" id="record-wrapper">
-                <div id="record-btn" class="record-btn-container">
-                    <div class="record-btn-inner"></div>
+            <!-- Baris Bawah Utama: Speedometer & Tombol Record -->
+            <div class="flex justify-between items-end w-full">
+                <!-- Kiri Bawah: Speedometer -->
+                <div class="glass-panel rounded-xl px-4 py-2 flex items-baseline gap-2 min-w-[100px]">
+                    <span id="speed-text" class="font-mono text-5xl font-bold">00</span>
+                    <span class="text-emerald-500 font-bold text-sm">KM/H</span>
                 </div>
+
+                <!-- Tengah Bawah: Tombol Record -->
+                <div class="interactive" id="record-wrapper">
+                    <div id="record-btn" class="record-btn-container">
+                        <div class="record-btn-inner"></div>
+                    </div>
+                </div>
+                
+                <!-- Kanan Bawah (Penyimbang Layout) -->
+                <div class="w-[100px]"></div>
             </div>
-            
-            <!-- Kanan Bawah: Kosong (Bisa untuk pengaturan nanti) -->
-            <div class="w-[100px]"></div>
+
         </div>
     </div>
 
@@ -201,6 +228,7 @@
         const timerContainer = document.getElementById('timer-container');
         const timerText = document.getElementById('timer-text');
         const recDot = document.getElementById('rec-dot');
+        const filterBtns = document.querySelectorAll('.filter-btn');
 
         // App State
         let isRecording = false;
@@ -210,6 +238,23 @@
         let mediaRecorder;
         let recordedChunks = [];
         let activeStream;
+
+        // Filter Logic untuk Touring
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-white/35', 'text-white', 'border-white/50');
+                    b.classList.add('bg-black/50', 'text-gray-300', 'border-transparent');
+                });
+                
+                const target = e.target;
+                target.classList.remove('bg-black/50', 'text-gray-300', 'border-transparent');
+                target.classList.add('bg-white/35', 'text-white', 'border-white/50');
+                
+                const filterValue = target.getAttribute('data-filter');
+                viewfinder.style.filter = filterValue;
+            });
+        });
 
         // Init Aplikasi
         startAppBtn.addEventListener('click', async () => {
@@ -221,7 +266,6 @@
                 initializeGeolocation();
                 await requestWakeLock();
                 
-                // Sembunyikan layar awal, tampilkan UI kamera
                 startupScreen.style.display = 'none';
                 uiLayer.classList.remove('hidden');
 
@@ -233,12 +277,12 @@
             }
         });
 
-        // 1. Inisialisasi Kamera (Langsung ke Video Element)
+        // 1. Inisialisasi Kamera
         async function initializeCamera() {
             const constraints = {
                 video: {
-                    facingMode: "environment", // Kamera Belakang
-                    width: { ideal: 1920 }, // Resolusi HD 1080p
+                    facingMode: "environment",
+                    width: { ideal: 1920 },
                     height: { ideal: 1080 }
                 },
                 audio: true
@@ -263,7 +307,6 @@
                         gpsStatus.innerHTML = `<span class="block w-2 h-2 rounded-full bg-green-400"></span> GPS Aktif`;
                         gpsStatus.classList.replace('text-yellow-400', 'text-green-400');
 
-                        // Hitung KM/Jam
                         const speedMs = position.coords.speed;
                         let kmh = 0;
                         if (speedMs !== null && speedMs >= 0) {
@@ -280,19 +323,18 @@
             }
         }
 
-        // 3. Inisialisasi Wake Lock (Layar Terus Menyala)
+        // 3. Inisialisasi Wake Lock
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock Aktif: Layar tidak akan mati.');
+                    console.log('Wake Lock Aktif');
                 }
             } catch (err) {
                 console.warn(`Wake Lock gagal: ${err.message}`);
             }
         }
         
-        // Meminta ulang Wake Lock jika pengguna sempat keluar (minimize) browser
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {
                 await requestWakeLock();
@@ -306,10 +348,9 @@
         });
 
         function startRecording() {
-            // Merekam langsung dari stream kamera, BUKAN dari canvas
             let options = { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 };
             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                options = { mimeType: 'video/mp4', videoBitsPerSecond: 8000000 }; // Fallback iOS/Safari
+                options = { mimeType: 'video/mp4', videoBitsPerSecond: 8000000 };
             }
 
             try {
@@ -325,24 +366,20 @@
             mediaRecorder.onstop = handleStop;
             
             recordedChunks = [];
-            mediaRecorder.start(1000); // Kumpulkan data tiap 1 detik
+            mediaRecorder.start(1000);
             
-            // Update UI
             isRecording = true;
             recordWrapper.classList.add('is-recording');
             downloadContainer.classList.add('hidden');
             gpsStatus.classList.add('hidden');
             timerContainer.classList.remove('hidden');
             
-            // Start UI Timer
             recordingStartTime = Date.now();
             timerInterval = setInterval(() => {
                 const diff = Math.floor((Date.now() - recordingStartTime) / 1000);
                 const mins = Math.floor(diff / 60).toString().padStart(2, '0');
                 const secs = (diff % 60).toString().padStart(2, '0');
                 timerText.innerText = `${mins}:${secs}`;
-                
-                // Indikator kedip
                 recDot.style.opacity = (diff % 2 === 0) ? '1' : '0.2';
             }, 1000);
         }
@@ -351,7 +388,6 @@
             mediaRecorder.stop();
             isRecording = false;
             
-            // Update UI
             recordWrapper.classList.remove('is-recording');
             clearInterval(timerInterval);
             timerContainer.classList.add('hidden');
@@ -368,10 +404,9 @@
             const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
             
             downloadBtn.href = url;
-            downloadBtn.download = `GoWebCam_${timestamp}.${ext}`;
+            downloadBtn.download = `GoWebCam_Touring_${timestamp}.${ext}`;
             downloadContainer.classList.remove('hidden');
 
-            // Auto-download setelah direkam
             setTimeout(() => downloadBtn.click(), 500);
         }
 
