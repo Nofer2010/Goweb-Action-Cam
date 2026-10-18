@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GoWeb Action Cam</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* The canvas fills the screen and acts as the viewfinder */
+        #viewfinder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures no stretching, acts like background-size: cover */
+            z-index: 1;
+        }
+
+        /* UI Layer stays above the canvas but is not recorded */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Let clicks pass through except for buttons */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Buttons need to be clickable */
+        .interactive {
+            pointer-events: auto;
+        }
+
+        /* Action Cam Record Button styling */
+        .record-btn-container {
+            width: 80px;
+            height: 80px;
+            border: 4px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .record-btn-inner {
+            width: 60px;
+            height: 60px;
+            background-color: #ff3b30;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        /* State when recording */
+        .is-recording .record-btn-inner {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px; /* Becomes a square */
+        }
+
+        .is-recording .record-btn-container {
+            border-color: #ff3b30;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .recording-indicator {
+            animation: blink 1s infinite;
+        }
+
+        /* Startup screen */
+        #startup-screen {
+            position: absolute;
+            z-index: 50;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        /* Hide scrollbar for filter menu */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-white selection:bg-red-500">
+
+    <!-- Startup / Permission Screen -->
+    <div id="startup-screen" class="w-full h-full flex flex-col items-center justify-center interactive p-6 text-center">
+        
+        <!-- BAGIAN LOGO DAN JUDUL -->
+        <div class="mb-8 flex flex-col items-center">
+            <!-- Ini adalah kode untuk memunculkan Logo -->
+            <img src="logo.png" alt="GoWeb Logo" class="w-32 h-32 mb-4 rounded-[2rem] shadow-2xl border border-gray-800">
+            
+            <h1 class="text-4xl font-extrabold tracking-tighter mb-2">GoWeb<span class="text-red-500">CAM</span></h1>
+            <p class="text-gray-400">High-Performance Action Camera & Telemetry Overlay</p>
+        </div>
+        
+        <div class="bg-black/40 p-6 rounded-2xl max-w-md w-full border border-gray-700 shadow-2xl mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-left">Required Permissions:</h2>
+            <ul class="text-left text-gray-300 space-y-3 mb-6">
+                <li class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Camera (Rear, 1080p/4K, High FPS)
+                </li>
+                <li class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Location (For Speedometer)
+                </li>
+            </ul>
+            <button id="start-app-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg uppercase tracking-wider">
+                Launch Camera
+            </button>
+        </div>
+        <p id="error-message" class="text-red-400 text-sm h-6"></p>
+    </div>
+
+    <!-- Hidden Video Element (Source of the camera stream) -->
+    <video id="hidden-video" class="hidden" autoplay playsinline muted></video>
+
+    <!-- Main Canvas Viewfinder (Where we draw video + HUD) -->
+    <canvas id="viewfinder"></canvas>
+
+    <!-- UI Overlay (Controls) -->
+    <div id="ui-layer" class="p-6 hidden">
+        <!-- Top Row: Info -->
+        <div class="flex justify-between items-start w-full">
+            <div>
+                <!-- Download section pops up here after recording -->
+                <div id="download-container" class="hidden interactive bg-black/70 p-4 rounded-xl border border-gray-600 backdrop-blur-sm">
+                    <p class="text-sm text-green-400 font-bold mb-2">Video Saved!</p>
+                    <a id="download-btn" href="#" download="GoWeb_ActionCam_Record.webm" class="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded font-semibold text-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Save to Device
+                    </a>
+                    <button id="close-download-btn" class="mt-2 text-xs text-gray-400 underline">Dismiss</button>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <!-- GPS Status -->
+                <div id="gps-status" class="bg-black/50 px-3 py-1 rounded-full text-xs font-mono text-yellow-400 border border-yellow-400/30 flex items-center gap-1 backdrop-blur-sm">
+                    <span class="block w-2 h-2 rounded-full bg-yellow-400"></span> Acquiring GPS...
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Controls -->
+        <div class="flex flex-col items-center justify-end w-full pb-8 gap-4">
+            
+            <!-- Filters UI -->
+            <div class="interactive flex gap-2 overflow-x-auto w-full px-4 pb-2 justify-center hide-scrollbar">
+                <button class="filter-btn active bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-white/40 shadow-lg" data-filter="none">Normal</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-transparent shadow-lg" data-filter="grayscale(100%)">B&W</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-transparent shadow-lg" data-filter="sepia(100%)">Sepia</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-transparent shadow-lg" data-filter="invert(100%)">Invert</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-transparent shadow-lg" data-filter="saturate(200%) contrast(120%)">Vivid</button>
+            </div>
+
+            <div class="interactive" id="record-wrapper">
+                <div id="record-btn" class="record-btn-container">
+                    <div class="record-btn-inner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const startupScreen = document.getElementById('startup-screen');
+        const startAppBtn = document.getElementById('start-app-btn');
+        const errorMessage = document.getElementById('error-message');
+        const uiLayer = document.getElementById('ui-layer');
+        const hiddenVideo = document.getElementById('hidden-video');
+        const canvas = document.getElementById('viewfinder');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optimize canvas for no transparency base
+        const recordBtn = document.getElementById('record-btn');
+        const recordWrapper = document.getElementById('record-wrapper');
+        const downloadContainer = document.getElementById('download-container');
+        const downloadBtn = document.getElementById('download-btn');
+        const closeDownloadBtn = document.getElementById('close-download-btn');
+        const gpsStatus = document.getElementById('gps-status');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        // App State
+        let isRecording = false;
+        let currentSpeedKmh = 0;
+        let hasGpsFix = false;
+        let recordingTime = 0;
+        let recordingStartTime = 0;
+        let animationFrameId;
+        let currentVideoFilter = 'none';
+        
+        // Media Recorder State
+        let mediaRecorder;
+        let recordedChunks = [];
+        let canvasStream;
+
+        // Configuration (Mencoba 4K/1080p dengan 120fps jika perangkat mendukung)
+        const TARGET_RESOLUTION = { width: { ideal: 3840, min: 1920 }, height: { ideal: 2160, min: 1080 } }; // Coba 4K, fallback 1080p
+        const TARGET_FPS = 120; // Will fallback to device limits (30/60) jika browser membatasi
+
+        // Filter Logic
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active styling from all
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-white/20', 'text-white', 'border-white/40');
+                    b.classList.add('bg-black/50', 'text-gray-300', 'border-transparent');
+                });
+                
+                // Add active styling to clicked target
+                const target = e.target;
+                target.classList.remove('bg-black/50', 'text-gray-300', 'border-transparent');
+                target.classList.add('bg-white/20', 'text-white', 'border-white/40');
+                
+                currentVideoFilter = target.getAttribute('data-filter');
+            });
+        });
+
+        // Init the App
+        startAppBtn.addEventListener('click', async () => {
+            try {
+                startAppBtn.disabled = true;
+                startAppBtn.innerHTML = 'Requesting Access...';
+                
+                await initializeCamera();
+                initializeGeolocation();
+                
+                // Hide startup, show UI
+                startupScreen.style.display = 'none';
+                uiLayer.classList.remove('hidden');
+                
+                // Start drawing the canvas loop
+                startCanvasLoop();
+
+            } catch (error) {
+                console.error("Initialization error:", error);
+                errorMessage.innerText = "Error: " + error.message;
+                startAppBtn.disabled = false;
+                startAppBtn.innerHTML = 'Try Again';
+            }
+        });
+
+        // 1. Initialize Camera
+        async function initializeCamera() {
+            const constraints = {
+                video: {
+                    facingMode: "environment", // Prefer rear camera
+                    width: TARGET_RESOLUTION.width,
+                    height: TARGET_RESOLUTION.height,
+                    frameRate: { ideal: TARGET_FPS, min: 30 }
+                },
+                audio: true // Set to false if you only want video without mic
+            };
+
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            hiddenVideo.srcObject = stream;
+            
+            // Wait for video metadata to load to set canvas dimensions correctly
+            return new Promise((resolve) => {
+                hiddenVideo.onloadedmetadata = () => {
+                    hiddenVideo.play();
+                    // Set internal canvas resolution to match the actual camera hardware output for high quality
+                    canvas.width = hiddenVideo.videoWidth;
+                    canvas.height = hiddenVideo.videoHeight;
+                    console.log(`Camera active at ${canvas.width}x${canvas.height}`);
+                    resolve();
+                };
+            });
+        }
+
+        // 2. Initialize Geolocation
+        function initializeGeolocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        hasGpsFix = true;
+                        gpsStatus.innerHTML = `<span class="block w-2 h-2 rounded-full bg-green-400"></span> GPS Active`;
+                        gpsStatus.classList.replace('text-yellow-400', 'text-green-400');
+                        gpsStatus.classList.replace('border-yellow-400/30', 'border-green-400/30');
+
+                        // Speed is in meters/second. Convert to KM/H
+                        const speedMs = position.coords.speed;
+                        if (speedMs !== null && speedMs >= 0) {
+                            currentSpeedKmh = Math.round(speedMs * 3.6);
+                        } else {
+                            // Some devices return null when completely stationary or lacking specific sensors
+                            currentSpeedKmh = 0; 
+                        }
+                    },
+                    (error) => {
+                        console.warn("GPS Error: ", error.message);
+                        hasGpsFix = false;
+                        gpsStatus.innerHTML = `<span class="block w-2 h-2 rounded-full bg-red-400"></span> GPS Lost`;
+                        gpsStatus.classList.replace('text-green-400', 'text-red-400');
+                        currentSpeedKmh = 0;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        maximumAge: 0,
+                        timeout: 5000
+                    }
+                );
+            } else {
+                gpsStatus.innerHTML = `<span class="block w-2 h-2 rounded-full bg-red-400"></span> No GPS Support`;
+                currentSpeedKmh = 0;
+            }
+        }
+
+        // 3. Canvas Drawing Loop (The magic that burns the HUD into the video)
+        function startCanvasLoop() {
+            function drawFrame() {
+                // Apply selected filter to video
+                ctx.filter = currentVideoFilter;
+
+                // Clear and draw the current video frame onto the canvas
+                ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
+
+                // Reset filter for HUD so HUD remains in original color (doesn't get B&W/Inverted)
+                ctx.filter = 'none';
+
+                // --- DRAW HUD DIRECTLY ON CANVAS ---
+                // We use dynamic sizing based on canvas width to ensure it looks right on the recorded 1080p file,
+                // not just on the CSS-scaled screen.
+                
+                const scale = canvas.width / 1920; // Baseline scale assuming 1080p
+                
+                // Draw Speedometer (Bottom Left)
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.beginPath();
+                ctx.roundRect(40 * scale, canvas.height - (160 * scale), 320 * scale, 120 * scale, 15 * scale);
+                ctx.fill();
+
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${80 * scale}px 'Share Tech Mono', monospace`;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                // Pad speed with 0 if needed for visual consistency (e.g. 05, 12, 120)
+                const speedText = currentSpeedKmh.toString().padStart(2, '0');
+                ctx.fillText(speedText, 60 * scale, canvas.height - (110 * scale));
+                
+                ctx.fillStyle = '#10b981'; // Tailwind emerald-500
+                ctx.font = `bold ${30 * scale}px 'Inter', sans-serif`;
+                ctx.fillText('KM/H', 180 * scale + (ctx.measureText(speedText).width/2), canvas.height - (100 * scale));
+
+                // Draw Recording Indicator & Timer (Top Center)
+                if (isRecording) {
+                    const now = Date.now();
+                    const diff = Math.floor((now - recordingStartTime) / 1000);
+                    const mins = Math.floor(diff / 60).toString().padStart(2, '0');
+                    const secs = (diff % 60).toString().padStart(2, '0');
+                    const timeStr = `${mins}:${secs}`;
+
+                    // Blinking logic based on time
+                    const showDot = Math.floor(now / 500) % 2 === 0;
+
+                    // Background pill
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.beginPath();
+                    const timerWidth = 220 * scale;
+                    ctx.roundRect((canvas.width/2) - (timerWidth/2), 40 * scale, timerWidth, 60 * scale, 30 * scale);
+                    ctx.fill();
+
+                    // Red Dot
+                    if (showDot) {
+                        ctx.fillStyle = '#ff3b30';
+                        ctx.beginPath();
+                        ctx.arc((canvas.width/2) - (60 * scale), 70 * scale, 12 * scale, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Timer Text
+                    ctx.fillStyle = 'white';
+                    ctx.font = `bold ${35 * scale}px 'Share Tech Mono', monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(timeStr, canvas.width/2 + (15 * scale), 73 * scale);
+                }
+
+                // Add branding watermark (Top Left)
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.font = `bold ${30 * scale}px 'Inter', sans-serif`;
+                ctx.textAlign = 'left';
+                ctx.fillText('GoWeb CAM', 40 * scale, 70 * scale);
+
+                // Request next frame
+                animationFrameId = requestAnimationFrame(drawFrame);
+            }
+
+            drawFrame();
+        }
+
+        // 4. Recording Logic
+        recordBtn.addEventListener('click', () => {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+
+        function startRecording() {
+            // Setup Stream capture from canvas
+            // Capture at 60fps atau lebih tinggi jika didukung (Ini batas rekaman canvas).
+            canvasStream = canvas.captureStream(60); 
+            
+            // If the original camera stream has audio, mix it in!
+            const audioTracks = hiddenVideo.srcObject.getAudioTracks();
+            if (audioTracks.length > 0) {
+                canvasStream.addTrack(audioTracks[0]);
+            }
+
+            // Determine best mime type with highest available bitrate
+            let options = { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 8000000 }; // Target 8Mbps untuk kualitas tinggi
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'video/webm;codecs=vp8,opus', videoBitsPerSecond: 8000000 };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = { mimeType: 'video/mp4', videoBitsPerSecond: 8000000 }; // Fallback for Safari/iOS
+                }
+            }
+
+            try {
+                mediaRecorder = new MediaRecorder(canvasStream, options);
+            } catch (e) {
+                console.error('Exception while creating MediaRecorder:', e);
+                // Ultimate fallback
+                mediaRecorder = new MediaRecorder(canvasStream); 
+            }
+
+            mediaRecorder.ondataavailable = handleDataAvailable;
+            mediaRecorder.onstop = handleStop;
+            
+            recordedChunks = [];
+            mediaRecorder.start(1000); // Collect data in 1s chunks
+            
+            // Update UI State
+            isRecording = true;
+            recordingStartTime = Date.now();
+            recordWrapper.classList.add('is-recording');
+            downloadContainer.classList.add('hidden'); // hide previous download link
+            
+            console.log("Recording started...");
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            isRecording = false;
+            recordWrapper.classList.remove('is-recording');
+            console.log("Recording stopped.");
+        }
+
+        function handleDataAvailable(event) {
+            if (event.data && event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        }
+
+        function handleStop(event) {
+            // Create Blob and Object URL
+            const mimeType = recordedChunks[0].type || 'video/mp4';
+            const blob = new Blob(recordedChunks, { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            
+            // Prepare download link
+            downloadBtn.href = url;
+            // Generate filename with timestamp
+            const date = new Date();
+            const timestamp = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}_${date.getHours()}${date.getMinutes()}`;
+            
+            let ext = 'webm';
+            if(mimeType.includes('mp4')) ext = 'mp4';
+            downloadBtn.download = `GoWebCam_${timestamp}.${ext}`;
+            
+            // Show download UI
+            downloadContainer.classList.remove('hidden');
+
+            // Auto-Save to Device (Automatically clicks download button after 500ms)
+            setTimeout(() => {
+                downloadBtn.click();
+            }, 500);
+        }
+
+        closeDownloadBtn.addEventListener('click', () => {
+            downloadContainer.classList.add('hidden');
+        });
+
+    </script>
+</body>
+</html>
