@@ -127,11 +127,11 @@
                     <span class="text-yellow-400">💡</span> Anti Layar Mati (Wake Lock Aktif)
                 </li>
                 <li class="flex items-center gap-3">
-                    <span class="text-purple-400">🎨</span> Pilihan Efek Kamera Estetik Lebih Banyak
+                    <span class="text-purple-400">🎨</span> Pilihan Efek Kamera Estetik
                 </li>
             </ul>
             <button id="start-app-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg uppercase tracking-wider shadow-lg">
-                Open Camera
+                Mulai Touring
             </button>
         </div>
         <p id="error-message" class="text-red-400 text-sm h-6"></p>
@@ -174,21 +174,17 @@
         </div>
 
         <!-- Barisan Bawah: Efek Kamera & Tombol Rekam -->
-        <div class="flex flex-col items-center justify-end w-full pb-2 gap-3">
+        <div class="flex flex-col items-center justify-end w-full pb-4 gap-4">
             
-            <!-- Pilihan Efek Kamera Touring (Diperbanyak & Dioptimalkan untuk Potret) -->
-            <div class="interactive flex gap-2 overflow-x-auto w-full px-2 py-1 hide-scrollbar">
-                <button class="filter-btn active bg-white/40 text-white px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/60 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="none">Normal</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="contrast(130%) saturate(140%) brightness(95%)">Cinematic</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="saturate(180%) contrast(110%)">Vivid Road</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="sepia(40%) contrast(120%) brightness(105%)">Warm Sunset</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="hue-rotate(180deg) saturate(130%)">Cool Blue</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="grayscale(100%) contrast(140%)">Classic B&W</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="contrast(150%) hue-rotate(290deg) saturate(160%)">Cyberpunk</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="sepia(60%) hue-rotate(-30deg) contrast(130%) brightness(90%)">Retro Film</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="contrast(160%) saturate(150%) brightness(105%)">HDR Boost</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="hue-rotate(90deg) saturate(200%) contrast(140%)">Matrix Green</button>
-                <button class="filter-btn bg-black/60 text-gray-300 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border border-white/10 shadow-lg whitespace-nowrap flex-shrink-0" data-filter="contrast(170%) brightness(85%)">Dramatic Dark</button>
+            <!-- Pilihan Efek Kamera Touring -->
+            <div class="interactive flex gap-2 overflow-x-auto w-full px-4 pb-1 justify-center hide-scrollbar">
+                <button class="filter-btn active bg-white/30 text-white px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-white/50 shadow-lg whitespace-nowrap" data-filter="none">Normal</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="contrast(130%) saturate(140%) brightness(95%)">Cinematic</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="saturate(180%) contrast(110%)">Vivid Road</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="sepia(40%) contrast(120%) brightness(105%)">Warm Sunset</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="hue-rotate(180deg) saturate(130%)">Cool Blue</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="grayscale(100%) contrast(140%)">Classic B&W</button>
+                <button class="filter-btn bg-black/50 text-gray-300 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-transparent shadow-lg whitespace-nowrap" data-filter="contrast(150%) hue-rotate(290deg) saturate(160%)">Cyberpunk</button>
             </div>
 
             <!-- Baris Bawah Utama: Speedometer & Tombol Record -->
@@ -243,17 +239,22 @@
         let recordedChunks = [];
         let activeStream;
 
+        // GPS State untuk Kalkulasi Manual
+        let lastLat = null;
+        let lastLon = null;
+        let lastTime = null;
+
         // Filter Logic untuk Touring
         filterBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 filterBtns.forEach(b => {
-                    b.classList.remove('bg-white/40', 'text-white', 'border-white/60');
-                    b.classList.add('bg-black/60', 'text-gray-300', 'border-white/10');
+                    b.classList.remove('bg-white/35', 'text-white', 'border-white/50');
+                    b.classList.add('bg-black/50', 'text-gray-300', 'border-transparent');
                 });
                 
-                const target = e.currentTarget;
-                target.classList.remove('bg-black/60', 'text-gray-300', 'border-white/10');
-                target.classList.add('bg-white/40', 'text-white', 'border-white/60');
+                const target = e.target;
+                target.classList.remove('bg-black/50', 'text-gray-300', 'border-transparent');
+                target.classList.add('bg-white/35', 'text-white', 'border-white/50');
                 
                 const filterValue = target.getAttribute('data-filter');
                 viewfinder.style.filter = filterValue;
@@ -281,13 +282,14 @@
             }
         });
 
-        // 1. Inisialisasi Kamera
+        // 1. Inisialisasi Kamera dengan Permintaan 60 FPS untuk Stabilisasi Alami
         async function initializeCamera() {
             const constraints = {
                 video: {
                     facingMode: "environment",
                     width: { ideal: 1920 },
-                    height: { ideal: 1080 }
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 60, min: 30 } // Meminta frame rate tinggi agar tidak patah-patah
                 },
                 audio: true
             };
@@ -303,7 +305,19 @@
             });
         }
 
-        // 2. Inisialisasi GPS
+        // Fungsi Hitung Jarak Manual (Jika Sensor Speed HP tidak berfungsi)
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; 
+        }
+
+        // 2. Inisialisasi GPS (Termasuk Perbaikan Fallback Kecepatan)
         function initializeGeolocation() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition(
@@ -313,9 +327,31 @@
 
                         const speedMs = position.coords.speed;
                         let kmh = 0;
-                        if (speedMs !== null && speedMs >= 0) {
+
+                        // Jika HP memberikan data kecepatan langsung
+                        if (speedMs !== null && speedMs > 0) {
                             kmh = Math.round(speedMs * 3.6);
+                        } else {
+                            // Sistem Cadangan: Hitung kecepatan manual dari jarak & waktu
+                            const currentLat = position.coords.latitude;
+                            const currentLon = position.coords.longitude;
+                            const currentTime = position.timestamp;
+
+                            if (lastLat !== null && lastTime !== null) {
+                                const timeDiffHours = (currentTime - lastTime) / 1000 / 3600; 
+                                if (timeDiffHours > 0) {
+                                    const distKm = getDistanceFromLatLonInKm(lastLat, lastLon, currentLat, currentLon);
+                                    kmh = Math.round(distKm / timeDiffHours);
+                                }
+                            }
+                            lastLat = currentLat;
+                            lastLon = currentLon;
+                            lastTime = currentTime;
                         }
+
+                        // Mengamankan nilai tidak masuk akal (glitch sinyal awal)
+                        if(kmh > 299 || isNaN(kmh)) kmh = 0;
+
                         speedTextEl.innerText = kmh.toString().padStart(2, '0');
                     },
                     (error) => {
